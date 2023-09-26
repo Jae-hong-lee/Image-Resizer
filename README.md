@@ -13,7 +13,6 @@ Electron application that allows you to select an image and easily change the wi
 Install dependencies:
 
 ```bash
-
 npm install
 ```
 
@@ -24,6 +23,7 @@ npm start
 ```
 
 You can also use `Electronmon` to constantly run and not have to reload after making changes
+`Electronmon` 을 사용하면 새로고침 할 필요없이 사용할 수 있다. (?)
 
 ```bash
 npx electronmon .

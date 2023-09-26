@@ -1,4 +1,3 @@
-// Some JavaScript to load the image and show the form. There is no actual backend functionality. This is just the UI
 // 이미지를 로드하고 폼을 보여주는 JS임. 백엔드 기능은 없고 단순 UI이 일뿐이다.
 const form = document.querySelector("#img-form");
 const img = document.querySelector("#img");
