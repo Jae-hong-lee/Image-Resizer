@@ -47,6 +47,35 @@ function loadImage(e) {
   filename.innerText = file.name;
   outputPath.innerText = path.join(os.homedir(), `imageresizer`);
 }
+/**
+ *
+ * @param {*} e
+ */
+function sendImage(e) {
+  // 현재의 이미지
+  e.preventDefault();
+
+  const width = widthInput.value;
+  const height = heightInput.value;
+  const imgPath = img.files[0].path;
+
+  // 기본값 방지
+  if (!img.files[0]) {
+    alertError("이미지를 올려주세요. ");
+  }
+  // 길이 높이 지정안했을 경우
+  if (width === "" || height === "") {
+    alertError("width, height 길이를 입력해주세요. ");
+  }
+
+  // ipcRenderer를 사용하여 메인으로 보내기
+  // 이것을 main 에서 ipcmain 을 통해서 받아보기
+  ipcRenderer.send("image:resize", {
+    imgPath,
+    width,
+    height,
+  });
+}
 
 /**
  * 파일이 이미지인지 체크
@@ -87,3 +116,4 @@ function alertSucces(message) {
 }
 
 document.querySelector("#img").addEventListener("change", loadImage);
+form.addEventListener("submit", sendImage);

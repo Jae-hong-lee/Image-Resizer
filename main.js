@@ -1,5 +1,7 @@
 const path = require("path");
-const { app, BrowserWindow, Menu } = require("electron");
+const os = require("os");
+const fs = require("fs");
+const { app, BrowserWindow, Menu, ipcMain } = require("electron");
 
 const isDev = process.env.NODE_ENV !== "development";
 const isMac = process.platform === "darwin";
@@ -87,6 +89,21 @@ const menu = [
       ]
     : []),
 ];
+
+// ipcRenderer 이미지 크기 조정
+ipcMain.on("image:resize", (e, options) => {
+  // 우리가 resize 해서 저장할 곳
+  options.dest = path.join(os.homedir(), "imageresizer");
+  resizeImage(options);
+  // renerer.js 에서 보낸 option을 ipcMain을 통해 받아서 출력
+  console.log(options);
+});
+
+// 이미지 resize 함수
+// 4가지 옵션
+// 이미지 경로, width, height, dest(대상, 대상폴더)
+// try catch 로 에러를 잡고 우리가 설치한 img 도구를 통해 resize 할거임
+function resizeImage() {}
 
 app.on("window-all-closed", () => {
   if (!isMac) app.quit();
