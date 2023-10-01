@@ -18,9 +18,6 @@ const widthInput = document.querySelector("#width");
 // 그럼 이걸 어디서 적용? -> main.js 에서 처음 윈도우를 create 할때 preload 작업을 수행시킨다.
 // 모든 항목에 내가 이것들을 사용한다는 것을 알리는 것.
 
-// console.log(versions.node());
-// main 에서 preload 적용시킨 후 렌더러에서 version node를 확인해보면 노드 버전 확인가능.
-
 /**
  * 이미지 파일 로드 함수
  * @param {*} e
@@ -30,8 +27,8 @@ function loadImage(e) {
   const file = e.target.files[0];
 
   if (!isFileImage(file)) {
-    // 이미지가 아닐경우 alert창을 통해 사용자에게 표시
-    alert("Please select an image file");
+    // alert을 이용하는게 아닌 toastify을 통한 에러 메세지출력
+    alertError("이미지 파일을 선택해주세요.");
     return;
   }
 
@@ -45,9 +42,10 @@ function loadImage(e) {
     heightInput.value = this.height;
   };
 
+  // 선택한 파일이름(filename)과 홈디렉토리 어디로 출력되는지에 대한 경로(outputpath) 표시
   form.style.display = "block";
-  // 파일 이름 UI에 표시
-  document.querySelector("#filename").innerHTML = file.name;
+  filename.innerText = file.name;
+  outputPath.innerText = path.join(os.homedir(), `imageresizer`);
 }
 
 /**
@@ -59,6 +57,33 @@ function isFileImage(file) {
   const acceptedImageTypes = ["image/gif", "image/jpeg", "image/png"];
   // 허용된 이미지 타입일 경우 return 'true'
   return file && acceptedImageTypes.includes(file["type"]);
+}
+
+// toastify를 통한 에러메세지 출력 (5초후 사라지게.)
+function alertError(message) {
+  Toastify.toast({
+    text: message,
+    duration: 5000,
+    close: false,
+    style: {
+      background: "red",
+      color: "white",
+      textAlign: "center",
+    },
+  });
+}
+// toastify를 통한 성공메세지 출력 (5초후 사라지게.)
+function alertSucces(message) {
+  Toastify.toast({
+    text: message,
+    duration: 5000,
+    close: false,
+    style: {
+      background: "green",
+      color: "white",
+      textAlign: "center",
+    },
+  });
 }
 
 document.querySelector("#img").addEventListener("change", loadImage);
