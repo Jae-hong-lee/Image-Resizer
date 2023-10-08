@@ -1,14 +1,18 @@
 const path = require("path");
 const os = require("os");
 const fs = require("fs");
-const { app, BrowserWindow, Menu, ipcMain } = require("electron");
+const resizeImg = require("resize-img");
+const { app, BrowserWindow, Menu, ipcMain, shell } = require("electron");
 
-const isDev = process.env.NODE_ENV !== "development";
+process.env.NODE_ENV = "production";
+
+const isDev = process.env.NODE_ENV !== "production";
 const isMac = process.platform === "darwin";
 
+let mainWindow;
 // 메인 윈도우 만드는 함수
 function createMainWindow() {
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     title: "Image Resizer",
     width: isDev ? 1000 : 500,
     height: 600,
@@ -48,6 +52,10 @@ app.whenReady().then(() => {
   // 밑에서 만든 메뉴 템플릿을 통해 mac 과 window os 별로 메뉴를 구현하였음.
   const mainMenu = Menu.buildFromTemplate(menu);
   Menu.setApplicationMenu(mainMenu);
+
+  // mainWindow 삭제
+  // : (main.js 한정)전역변수(?)로 mainwindow 를 할당해놨기 때문에 메모리 누수가 될 수 있어서 삭제(null값 저장)
+  mainWindow.on("closed", () => (mainWindow = null));
 
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {
@@ -102,8 +110,33 @@ ipcMain.on("image:resize", (e, options) => {
 // 이미지 resize 함수
 // 4가지 옵션
 // 이미지 경로, width, height, dest(대상, 대상폴더)
-// try catch 로 에러를 잡고 우리가 설치한 img 도구를 통해 resize 할거임
-function resizeImage() {}
+async function resizeImage({ imgPath, width, height, dest }) {
+  try {
+    // resize하기 위해 fs 모듈로 이미지 파일 동기화
+    const newPath = await resizeImg(fs.readFileSync(imgPath), {
+      width: +width,
+      height: +height,
+    });
+
+    // 파일이름 생성
+    const filename = path.basename(imgPath);
+
+    // 저장될 대상폴더가 없다면 폴더생성
+    if (!fs.existsSync(dest)) {
+      fs.mkdirSync(dest);
+    }
+
+    // 파일을 대상에 쓰기(?) =  write file to dest
+    fs.writeFileSync(path.join(dest, filename), newPath);
+
+    // 성공하고 나면 렌더러에 성공메세지를 보낸다. -> 대상폴더를 열기 위해서
+    mainWindow.webContents.send("image:done");
+    // 대상폴더 열기
+    shell.openPath(dest);
+  } catch (error) {
+    console.log(error);
+  }
+}
 
 app.on("window-all-closed", () => {
   if (!isMac) app.quit();

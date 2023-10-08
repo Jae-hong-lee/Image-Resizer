@@ -77,6 +77,9 @@ function sendImage(e) {
   });
 }
 
+ipcRenderer.on("image:done", () => {
+  alertSucces("");
+});
 /**
  * 파일이 이미지인지 체크
  * @param {*} file
